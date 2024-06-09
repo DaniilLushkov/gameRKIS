@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Game</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #gameCanvas {
+            border: 1px solid #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        // Основные переменные
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
+        const colliders = [];
+        const tilesets = [];
+        const bullets = [];
+        const bulletSpeed = 10;
+        let currentLevel = 'level_0'; // Начальный уровень
+
+        // Игрок
+        const player = {
+            x: 50,
+            y: 450,
+            width: 50,
+            height: 50,
+            color: 'blue',
+            speed: 5,
+            dx: 0,
+            dy: 0,
+            isJumping: false,
+            jumpStrength: 15,
+            gravity: 0.5,
+        };
+
+        // Состояние клавиш
+        const keys = {
+            a: false,
+            d: false,
+            space: false
+        };
+
+        // Обработка движения мыши
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            player.angle = Math.atan2(mouseY - player.y, mouseX - player.x);
+        });
+
+        // Обработка нажатий клавиш
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'a') keys.a = true;
+            if (e.key === 'd') keys.d = true;
+            if (e.key === ' ') {
+                if (!player.isJumping) {
+                    player.isJumping = true;
+                    player.dy = -player.jumpStrength;
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'a') keys.a = false;
+            if (e.key === 'd') keys.d = false;
+        });
+
+        // Обработка кликов мыши для стрельбы
+        window.addEventListener('click', (e) => {
+            bullets.push({
+                x: player.x + player.width / 2,
+                y: player.y + player.height / 2,
+                dx: bulletSpeed * Math.cos(player.angle),
+                dy: bulletSpeed * Math.sin(player.angle),
+                width: 10,
+                height: 5,
+                color: 'red',
+            });
+        });
+
+        // Функция для загрузки уровня
+        async function loadMap(level, callback) {
+            const response = await fetch(`Project/Levels/${level}.tmj`);
+            const mapData = await response.json();
+            callback(mapData);
+        }
+
+        // Функция для загрузки тайлсета
+        async function loadTileset(tileset) {
+            const response = await fetch(`Project/Tiles/${tileset.source}`);
+            const tsxText = await response.text();
+            const parser = new DOMParser();
+            const tsxDoc = parser.parseFromString(tsxText, 'application/xml');
+            
+            // Получаем путь к изображению тайлсета
+            const imagePath = tsxDoc.getElementsByTagName('image')[0].getAttribute('source');
+            const tilesetImage = new Image();
+            tilesetImage.src = `Project/Tiles/${imagePath}`;
+
+            return new Promise((resolve) => {
+                tilesetImage.onload = () => {
+                    tilesets.push({
+                        firstgid: tileset.firstgid,
+                        image: tilesetImage,
+                        tileWidth: parseInt(tsxDoc.getElementsByTagName('tileset')[0].getAttribute('tilewidth')),
+                        tileHeight: parseInt(tsxDoc.getElementsByTagName('tileset')[0].getAttribute('tileheight')),
+                        imageWidth: tilesetImage.width,
+                        imageHeight: tilesetImage.height
+                    });
+                    resolve();
+                };
+            });
+        }
+
+        // Функция для отрисовки карты
+        function drawMap(mapData) {
+            const promises = mapData.tilesets.map(tileset => loadTileset(tileset));
+            Promise.all(promises).then(() => {
+                mapData.layers.forEach(layer => {
+                    if (layer.type === 'tilelayer') {
+                        drawTileLayer(layer, mapData.tilewidth, mapData.tileheight);
+                    } else if (layer.type === 'objectgroup' && layer.name === 'Colliders') {
+                        layer.objects.forEach(object => {
+                            colliders.push({
+                                x: object.x,
+                                y: object.y,
+                                width: object.width,
+                                height: object.height
+                            });
+                        });
+                    }
+                });
+                drawPlayerAndBullets();
+            });
+        }
+
+        // Функция для отрисовки слоя тайлов
+        function drawTileLayer(layer, tileWidth, tileHeight) {
+            for (let y = 0; y < layer.height; y++) {
+                for (let x = 0; x < layer.width; x++) {
+                    const tileIndex = layer.data[y * layer.width + x];
+                    if (tileIndex) {
+                        const tileset = getTileset(tileIndex);
+                        if (tileset) {
+                            const localTileIndex = tileIndex - tileset.firstgid;
+                            const sx = (localTileIndex % (tileset.imageWidth / tileset.tileWidth)) * tileset.tileWidth;
+                            const sy = Math.floor(localTileIndex / (tileset.imageWidth / tileset.tileWidth)) * tileset.tileHeight;
+                            context.drawImage(tileset.image, sx, sy, tileset.tileWidth, tileset.tileHeight, x * tileWidth, y * tileHeight, tileWidth, tileHeight);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Функция для получения тайлсета по индексу тайла
+        function getTileset(tileIndex) {
+            for (let i = tilesets.length - 1; i >= 0; i--) {
+                if (tileIndex >= tilesets[i].firstgid) {
+                    return tilesets[i];
+                }
+            }
+            return null;
+        }
+
+        // Функция для отрисовки игрока и пуль
+        function drawPlayerAndBullets() {
+            context.fillStyle = player.color;
+            context.fillRect(player.x, player.y, player.width, player.height);
+
+            bullets.forEach((bullet) => {
+                context.fillStyle = bullet.color;
+                context.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            });
+        }
+
+        // Функция для проверки столкновений
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        // Основная функция обновления игры
+        function update() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            loadMap(currentLevel, drawMap);
+
+            // Обработка движения игрока
+            if (keys.a) player.dx = -player.speed;
+            if (keys.d) player.dx = player.speed;
+            if (!keys.a && !keys.d) player.dx = 0;
+
+            player.x += player.dx;
+            player.y += player.dy;
+
+            if (player.isJumping) {
+                player.dy += player.gravity;
+                if (player.y + player.height >= canvas.height) {
+                    player.isJumping = false;
+                    player.y = canvas.height - player.height;
+                    player.dy = 0;
+                }
+            }
+
+            // Проверка столкновений игрока с коллайдерами
+            colliders.forEach(collider => {
+                if (checkCollision(player, collider)) {
+                    if (player.dx > 0) {
+                        player.x = collider.x - player.width;
+                    } else if (player.dx < 0) {
+                        player.x = collider.x + collider.width;
+                    }
+                    if (player.dy > 0) {
+                        player.y = collider.y - player.height;
+                        player.isJumping = false;
+                        player.dy = 0;
+                    } else if (player.dy < 0) {
+                        player.y = collider.y + collider.height;
+                        player.dy = 0;
+                    }
+                }
+            });
+
+            
+            // Обработка движения пуль
+                bullets.forEach((bullet, index) => {
+                bullet.x += bullet.dx;
+                bullet.y += bullet.dy;
+                if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+                    bullets.splice(index, 1);
+                }
+            });
+
+            drawPlayerAndBullets();
+            requestAnimationFrame(update);
+        }
+
+        // Загрузка и отрисовка начального уровня
+        loadMap(currentLevel, drawMap);
+
+        // Начало обновления игры
+        update();
+    </script>
+</body>
+</html>
+

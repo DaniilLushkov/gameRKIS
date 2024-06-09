@@ -1,0 +1,127 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "Levels/level_1.tmj",
+    "expandedProjectPaths": [
+        ".",
+        "Tiles",
+        "Levels"
+    ],
+    "fileStates": {
+        "Levels/level_0.tmj": {
+            "scale": 2,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 64.5,
+                "y": 59
+            }
+        },
+        "Levels/level_1.tmj": {
+            "scale": 0.33,
+            "selectedLayer": 6,
+            "viewCenter": {
+                "x": 936.3636363636363,
+                "y": 1560.6060606060605
+            }
+        },
+        "Tiles/tile1.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 0.25
+        },
+        "Tiles/tile1_1.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "Tiles/tile1_5.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 3,
+            "scaleInEditor": 2
+        },
+        "Tiles/tile2.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "Tiles/tile3.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 0.33
+        },
+        "Tiles/tile4.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.125,
+            "scaleInEditor": 0.33
+        },
+        "Tiles/tile5.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 2,
+            "scaleInEditor": 2
+        },
+        "Tiles/tile6.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "Tiles/tile7.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1.5
+        },
+        "Tiles/tile8.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Tiles/tile9.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.33,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/Даниил/Downloads",
+    "map.height": 150,
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 150,
+    "openFiles": [
+        "Levels/level_0.tmj",
+        "Levels/level_1.tmj",
+        "Tiles/tile1.tsx",
+        "Tiles/tile2.tsx",
+        "Tiles/tile3.tsx",
+        "Tiles/tile4.tsx",
+        "Tiles/tile5.tsx",
+        "Tiles/tile6.tsx",
+        "Tiles/tile7.tsx",
+        "Tiles/tile8.tsx",
+        "Tiles/tile9.tsx",
+        "Tiles/tile1_1.tsx",
+        "Tiles/tile1_5.tsx"
+    ],
+    "project": "Map.tiled-project",
+    "recentFiles": [
+        "Levels/level_0.tmj",
+        "Tiles/tile1_5.tsx",
+        "Tiles/tile1_1.tsx",
+        "Tiles/tile9.tsx",
+        "Tiles/tile8.tsx",
+        "Tiles/tile7.tsx",
+        "Tiles/tile6.tsx",
+        "Tiles/tile5.tsx",
+        "Tiles/tile4.tsx",
+        "Tiles/tile3.tsx",
+        "Tiles/tile2.tsx",
+        "Tiles/tile1.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    },
+    "tileset.type": 0
+}
